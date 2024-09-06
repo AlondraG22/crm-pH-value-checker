@@ -8,6 +8,17 @@
 #
 
 library(shiny)
+library(DBI)
+library(RPostgreSQL)
+
+
+con <- dbConnect(
+  drv = PostgreSQL(),
+  user = Sys.getenv("DB_USER"),
+  password = Sys.getenv("DB_PASSWORD"),
+  host = Sys.getenv("DB_HOST"),
+  dbname = Sys.getenv("DB_NAME")
+)
 
 # Define UI for application that draws a histogram
 ui <- fluidPage(
@@ -27,7 +38,8 @@ ui <- fluidPage(
 
         # Show a plot of the generated distribution
         mainPanel(
-           plotOutput("distPlot")
+           # plotOutput("distPlot")
+          tableOutput('test')
         )
     )
 )
@@ -44,6 +56,10 @@ server <- function(input, output) {
         hist(x, breaks = bins, col = 'darkgray', border = 'white',
              xlab = 'Waiting time to next eruption (in mins)',
              main = 'Histogram of waiting times')
+    })
+    
+    output$test <- renderTable({
+      dbGetQuery(con, "SELECT datum, datumdescription FROM lu_datum")
     })
 }
 
